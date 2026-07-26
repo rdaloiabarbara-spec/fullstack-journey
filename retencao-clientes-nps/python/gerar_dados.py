@@ -112,8 +112,8 @@ def salvar_no_banco(dados):
     conexao.close()
 
 if __name__ == "__main__":
-    fin = gerar_comportamento_financeiro(20)
-    ate = gerar_historico_atendimento(20)
+    fin = gerar_comportamento_financeiro(200)
+    ate = gerar_historico_atendimento(200)
     completo = unir_dados(fin, ate)
     limpo = limpar_dados(completo)
     salvar_no_banco(limpo)
