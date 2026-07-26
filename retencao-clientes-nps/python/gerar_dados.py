@@ -98,7 +98,7 @@ def salvar_no_banco(dados):
             cliente["ID"],
             cliente["Saldo_Investido"],
             cliente["Qtd_Transacoes_Mes"],
-            str(cliente["Data_Ultima_Transacao"]),
+            str(cliente["Data_Ultima_Transacao"]) if cliente["Data_Ultima_Transacao"] is not None else None,
             cliente["Qtd_Reclamacoes"],
             cliente["Nota_NPS"]
         ))
