@@ -15,6 +15,7 @@ def gerar_comportamento_financeiro(quantidade):
 
         cliente = {
             "ID": i + 1,
+            "Segmento": random.choice(["Varejo", "Alta Renda", "Private"]),
             "Saldo_Investido": random.randint(0, 50000),
             "Qtd_Transacoes_Mes": random.randint(0, 20),
             "Data_Ultima_Transacao": data_transacao
@@ -40,6 +41,7 @@ def unir_dados(financeiro, atendimento):
             if cliente_fin["ID"] == cliente_ate["ID"]:
                 cliente_completo = {
                     "ID": cliente_fin["ID"],
+                    "Segmento": cliente_fin["Segmento"], 
                     "Saldo_Investido": cliente_fin["Saldo_Investido"],
                     "Qtd_Transacoes_Mes": cliente_fin["Qtd_Transacoes_Mes"],
                     "Data_Ultima_Transacao": cliente_fin["Data_Ultima_Transacao"],
@@ -81,21 +83,24 @@ def salvar_no_banco(dados):
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS analytics_retencao (
             ID INTEGER PRIMARY KEY,
+            Segmento TEXT,
             Saldo_Investido INTEGER,
             Qtd_Transacoes_Mes INTEGER,
             Data_Ultima_Transacao TEXT,
             Qtd_Reclamacoes INTEGER,
             Nota_NPS REAL
+            
         )
     """)
 
     for cliente in dados:
-        cursor.execute("""
+           cursor.execute("""
             INSERT OR REPLACE INTO analytics_retencao 
-            (ID, Saldo_Investido, Qtd_Transacoes_Mes, Data_Ultima_Transacao, Qtd_Reclamacoes, Nota_NPS)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (ID, Segmento, Saldo_Investido, Qtd_Transacoes_Mes, Data_Ultima_Transacao, Qtd_Reclamacoes, Nota_NPS)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             cliente["ID"],
+            cliente["Segmento"],
             cliente["Saldo_Investido"],
             cliente["Qtd_Transacoes_Mes"],
             str(cliente["Data_Ultima_Transacao"]) if cliente["Data_Ultima_Transacao"] is not None else None,
