@@ -45,7 +45,13 @@ A identificação usa subqueries correlacionadas em SQL, comparando cada cliente
 
 ## Resultados Encontrados
 
-Em uma base de 200 clientes simulados, a consulta identificou 11 clientes de risco (~5,5% da base), uma proporção consistente com o esperado para um sistema de alerta (nem excessivo, nem irrelevante).
+Em uma base de 200 clientes simulados (com semente aleatória fixa, para reprodutibilidade), a consulta identificou 14 clientes de risco (7% da base), uma proporção consistente com o esperado para um sistema de alerta (nem excessivo, nem irrelevante).
+
+Os clientes de risco se dividem em duas naturezas de ação:
+- **Ação corretiva (3 clientes):** saldo zerado com histórico de transação e reclamação registrada — sinal de evasão já em andamento, que exige contato imediato.
+- **Ação preventiva (11 clientes):** saldo acima da média do segmento e nota de satisfação baixa, sem reclamação formal — sinal de insatisfação silenciosa, que exige monitoramento antes que a evasão se concretize.
+
+Essa divisão existe porque as duas naturezas de risco são estruturalmente diferentes: um cliente com saldo zero nunca pode, ao mesmo tempo, ter saldo acima da média do seu segmento (o saldo nunca é negativo), então os dois grupos nunca competem pelo mesmo cliente — cada perfil de risco identificado (1, 2 ou 3) é preservado numa coluna própria (`Perfil_Risco`), além da classificação agregada (`Tipo_Acao`), para manter a explicabilidade de qual regra específica sinalizou cada cliente.
 
 ## Tecnologias Utilizadas
 
@@ -72,5 +78,3 @@ Este projeto foi construído com fins de aprendizado, e algumas escolhas foram f
 - A união e o tratamento das fontes foram feitos com estruturas manuais em Python (loops e dicionários), para deixar a lógica explícita durante o aprendizado. Em um ambiente real, isso seria feito com bibliotecas como pandas.
 - Os dados foram persistidos em SQLite local, em produção normalmente estariam em um Data Warehouse corporativo (ex: Snowflake, BigQuery, Databricks).
 - A definição dos perfis de risco foi feita individualmente, sem ciclo de validação com um time de negócio, no ambiente real essas regras seriam construídas e ajustadas em conjunto com quem vai agir sobre os alertas.
-
-
