@@ -56,3 +56,21 @@ Em uma base de 200 clientes simulados, a consulta identificou 11 clientes de ris
 ## Próximos Passos
 
 - Dashboard em Power BI para visualização dos clientes de risco identificados
+
+## Limitações e Aproximação com o Trabalho Real
+
+Este projeto foi construído com fins de aprendizado, e algumas escolhas foram feitas para focar no raciocínio analítico, não na infraestrutura de produção. Vale registrar onde ele reflete o trabalho real de um profissional de dados e onde ele é uma simplificação didática:
+
+**Alinhado com a prática real:**
+- Integrar dados de sistemas diferentes (comportamento financeiro e atendimento) reflete um desafio comum do dia a dia, dados raramente chegam prontos em uma única fonte.
+- As regras de negócio aplicadas na limpeza (estimar nota neutra em vez de descartar cliente, diferenciar erro de sistema de evasão real usando a data da última transação) representam o tipo de julgamento que se espera de um analista, não apenas execução técnica.
+- Comparar cada cliente com a média do próprio segmento, em vez de uma média geral, é uma prática analítica real e evita conclusões distorcidas.
+- Priorizar regras explicáveis (em vez de um modelo de caixa-preta) é uma escolha comum em contextos de risco e compliance no mercado financeiro, onde é preciso justificar por que um cliente foi sinalizado.
+
+**Simplificações didáticas, não representativas do ambiente de produção:**
+- Os dados foram gerados sinteticamente, em produção a sujeira dos dados não é conhecida de antemão, é descoberta.
+- A união e o tratamento das fontes foram feitos com estruturas manuais em Python (loops e dicionários), para deixar a lógica explícita durante o aprendizado. Em um ambiente real, isso seria feito com bibliotecas como pandas.
+- Os dados foram persistidos em SQLite local, em produção normalmente estariam em um Data Warehouse corporativo (ex: Snowflake, BigQuery, Databricks).
+- A definição dos perfis de risco foi feita individualmente, sem ciclo de validação com um time de negócio, no ambiente real essas regras seriam construídas e ajustadas em conjunto com quem vai agir sobre os alertas.
+
+
