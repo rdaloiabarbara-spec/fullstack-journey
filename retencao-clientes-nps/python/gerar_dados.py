@@ -3,20 +3,36 @@ from datetime import datetime, timedelta
 import sqlite3
 import os
 
-def gerar_comportamento_financeiro(quantidade):
+def gerar_comportamento_financeiro(quantidade, proporcao_saldo_zerado=0.05):
     lista_clientes = []
     for i in range(quantidade):
-        tem_transacao = random.choice([True, False])
-        if tem_transacao:
+        # Sem isso, Saldo_Investido = 0 é praticamente impossível de sair de um
+        # randint(0, 50000) — e o Perfil 1 (saldo zerado) nunca teria dados para
+        # testar. Aqui forçamos uma proporção pequena e intencional desse cenário.
+        forcar_saldo_zerado = random.random() < proporcao_saldo_zerado
+
+        if forcar_saldo_zerado:
+            saldo = 0
+            # Transação passada garantida: representa evasão real em andamento,
+            # não erro de sistema — mantém coerência com a regra de limpeza
+            # que descarta saldo zero SEM histórico de transação.
             dias_atras = random.randint(1, 365)
             data_transacao = (datetime.now() - timedelta(days=dias_atras)).date()
         else:
-            data_transacao = None
+            # Começa em 1, não em 0: o zero já é tratado explicitamente acima,
+            # então aqui ele não pode reaparecer de forma não intencional.
+            saldo = random.randint(1, 50000)
+            tem_transacao = random.choice([True, False])
+            if tem_transacao:
+                dias_atras = random.randint(1, 365)
+                data_transacao = (datetime.now() - timedelta(days=dias_atras)).date()
+            else:
+                data_transacao = None
 
         cliente = {
             "ID": i + 1,
             "Segmento": random.choice(["Varejo", "Alta Renda", "Private"]),
-            "Saldo_Investido": random.randint(0, 50000),
+            "Saldo_Investido": saldo,
             "Qtd_Transacoes_Mes": random.randint(0, 20),
             "Data_Ultima_Transacao": data_transacao
         }
@@ -111,11 +127,43 @@ def salvar_no_banco(dados):
     conexao.commit()
     conexao.close()
 
+def criar_tabela_dashboard():
+    # Separada de salvar_no_banco de propósito: essa função não gera nem limpa
+    # dados novos, ela consome o que já está em analytics_retencao e aplica uma
+    # regra de negócio (a lógica de risco) por cima. São responsabilidades
+    # diferentes, por isso vivem em funções diferentes.
+    pasta_atual = os.path.dirname(os.path.abspath(__file__))
+    caminho_sql = os.path.join(pasta_atual, "..", "sql", "clientes_risco_dashboard.sql")
+    caminho_banco = os.path.join(pasta_atual, "..", "data", "retencao.db")
+
+    with open(caminho_sql, "r", encoding="utf-8") as arquivo:
+        query = arquivo.read()
+
+    # remove o ";" final: precisamos embutir a query como subconsulta de um
+    # CREATE TABLE, e um ";" no meio do caminho quebraria a sintaxe
+    query = query.strip().rstrip(";")
+
+    conexao = sqlite3.connect(caminho_banco)
+    cursor = conexao.cursor()
+
+    # DROP antes do CREATE: garante que rodar o script de novo sempre gere uma
+    # versão atualizada da tabela, em vez de falhar porque ela já existe
+    cursor.execute("DROP TABLE IF EXISTS clientes_risco_dashboard")
+    cursor.execute(f"CREATE TABLE clientes_risco_dashboard AS {query}")
+
+    conexao.commit()
+    conexao.close()
+
 if __name__ == "__main__":
+    # Semente fixa: garante que qualquer pessoa que rodar este script gere
+    # exatamente a mesma base fictícia documentada no README — reprodutibilidade,
+    # não dinamismo de dados reais (que este projeto não simula).
+    random.seed(42)
+
     fin = gerar_comportamento_financeiro(200)
     ate = gerar_historico_atendimento(200)
     completo = unir_dados(fin, ate)
     limpo = limpar_dados(completo)
     salvar_no_banco(limpo)
+    criar_tabela_dashboard()
     print("Dados salvos com sucesso!")
-
