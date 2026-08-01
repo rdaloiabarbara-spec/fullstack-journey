@@ -65,6 +65,10 @@ A lógica de risco foi transformada em um painel visual para consumo por um time
 - Um gráfico de percentual de risco por segmento, usando uma medida DAX (`DIVIDE` com `CALCULATE`) em vez de contagem absoluta — evita a distorção de um segmento parecer "mais arriscado" só por ter mais clientes no total.
 - Uma tabela nominal com os 14 clientes de risco, para ação direta do time.
 
+![Dashboard Power BI](imagens/dashboard-powerbi.png)
+
+O arquivo do relatório está disponível em [`powerbi/clientes_risco_dashboard.pbix`](powerbi/clientes_risco_dashboard.pbix) (requer Power BI Desktop para abrir) e uma versão estática em [`powerbi/clientes_risco_dashboard.pdf`](powerbi/clientes_risco_dashboard.pdf), para visualização sem precisar instalar nada. O `.pbix` foi conectado em modo de importação, então carrega uma cópia dos 200 registros sintéticos — sem problema aqui, já que os dados não são reais, mas um ponto de atenção que se levaria para qualquer projeto com dados de clientes de verdade.
+
 ## Tecnologias Utilizadas
 
 - Python (geração e tratamento de dados)
@@ -74,7 +78,7 @@ A lógica de risco foi transformada em um painel visual para consumo por um time
 
 ## Próximos Passos
 
-- Publicar capturas do dashboard e documentar a jornada de construção na série do LinkedIn
+- Estruturar uma narrativa de apresentação de negócio (não técnica) dos resultados, separada do dashboard exploratório
 
 ## Limitações e Aproximação com o Trabalho Real
 
@@ -94,3 +98,5 @@ Este projeto foi construído com fins de aprendizado, e algumas escolhas foram f
 
 **Fricção real encontrada mesmo em escala pequena:**
 - Conectar o Power BI a um banco SQLite não é uma integração pronta — exigiu instalar um driver ODBC separado e configurar uma fonte de dados nomeada (DSN) no Windows, um lembrete de que integração entre ferramentas raramente é plug-and-play, mesmo fora de um ambiente corporativo.
+
+
