@@ -53,15 +53,28 @@ Os clientes de risco se dividem em duas naturezas de ação:
 
 Essa divisão existe porque as duas naturezas de risco são estruturalmente diferentes: um cliente com saldo zero nunca pode, ao mesmo tempo, ter saldo acima da média do seu segmento (o saldo nunca é negativo), então os dois grupos nunca competem pelo mesmo cliente — cada perfil de risco identificado (1, 2 ou 3) é preservado numa coluna própria (`Perfil_Risco`), além da classificação agregada (`Tipo_Acao`), para manter a explicabilidade de qual regra específica sinalizou cada cliente.
 
+## Dashboard (Power BI)
+
+A lógica de risco foi transformada em um painel visual para consumo por um time de relacionamento com clientes.
+
+**Camada de dados dedicada ao dashboard:** em vez de conectar o Power BI direto na tabela bruta (`analytics_retencao`), a lógica de risco foi materializada numa tabela própria (`clientes_risco_dashboard`), gerada a partir de uma query SQL isolada (`clientes_risco_dashboard.sql`) e persistida automaticamente pelo pipeline Python (`criar_tabela_dashboard()`, chamada logo após `salvar_no_banco`). Essa separação evita duplicar a lógica de risco como medidas DAX dentro da ferramenta de BI — a regra de negócio continua vivendo em um único lugar, auditável em SQL.
+
+**Estrutura do painel:**
+- Um cartão de KPI com o total de clientes de risco.
+- Um gráfico comparando `Corretiva` vs `Preventiva`, ordenado por urgência de ação (não por volume).
+- Um gráfico de percentual de risco por segmento, usando uma medida DAX (`DIVIDE` com `CALCULATE`) em vez de contagem absoluta — evita a distorção de um segmento parecer "mais arriscado" só por ter mais clientes no total.
+- Uma tabela nominal com os 14 clientes de risco, para ação direta do time.
+
 ## Tecnologias Utilizadas
 
 - Python (geração e tratamento de dados)
 - SQLite (persistência e consultas analíticas)
 - SQL (subqueries correlacionadas)
+- Power BI (dashboard e medidas DAX)
 
 ## Próximos Passos
 
-- Dashboard em Power BI para visualização dos clientes de risco identificados
+- Publicar capturas do dashboard e documentar a jornada de construção na série do LinkedIn
 
 ## Limitações e Aproximação com o Trabalho Real
 
@@ -78,3 +91,6 @@ Este projeto foi construído com fins de aprendizado, e algumas escolhas foram f
 - A união e o tratamento das fontes foram feitos com estruturas manuais em Python (loops e dicionários), para deixar a lógica explícita durante o aprendizado. Em um ambiente real, isso seria feito com bibliotecas como pandas.
 - Os dados foram persistidos em SQLite local, em produção normalmente estariam em um Data Warehouse corporativo (ex: Snowflake, BigQuery, Databricks).
 - A definição dos perfis de risco foi feita individualmente, sem ciclo de validação com um time de negócio, no ambiente real essas regras seriam construídas e ajustadas em conjunto com quem vai agir sobre os alertas.
+
+**Fricção real encontrada mesmo em escala pequena:**
+- Conectar o Power BI a um banco SQLite não é uma integração pronta — exigiu instalar um driver ODBC separado e configurar uma fonte de dados nomeada (DSN) no Windows, um lembrete de que integração entre ferramentas raramente é plug-and-play, mesmo fora de um ambiente corporativo.
